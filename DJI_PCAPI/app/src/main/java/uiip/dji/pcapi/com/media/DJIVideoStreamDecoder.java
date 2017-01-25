@@ -223,11 +223,9 @@ public class DJIVideoStreamDecoder implements NativeHelper.NativeDataListener {
     public void parse(byte[] buf, int size) {
         logd( "parse data size: " + size);
         Message message = handlerNew.obtainMessage();
-        Logger.log("After obtain message");
         message.obj = buf;
         message.arg1 = size;
         handlerNew.sendMessage(message);
-        Logger.log("After send message");
     }
 
     /**

@@ -30,6 +30,7 @@ class VideoYuvWriterStrategy extends HandleStrategy
 
         DJICamera camera = PcApiApplication.getCameraInstance();
         if (camera != null) {
+            DJIVideoStreamDecoder.getInstance().setYuvDataListener(this);
             camera.setDJICameraReceivedVideoDataCallback(
                     new DJICamera.CameraReceivedVideoDataCallback() {
                         @Override
@@ -38,7 +39,6 @@ class VideoYuvWriterStrategy extends HandleStrategy
                             //Logger.log("Size: " + length);
                             //Logger.log(Arrays.toString(bytes));
                             try {
-                                Logger.log("Pasring");
                                 DJIVideoStreamDecoder.getInstance().parse(bytes, length);
                             }
                             catch(Exception e){
@@ -72,9 +72,7 @@ class VideoYuvWriterStrategy extends HandleStrategy
     @Override
     public void onYuvDataReceived(byte[] yuvFrame, int width, int height) {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
-        if (frameIndex % 50 == 0) {
-            Logger.showToast("Getted frame with index "+frameIndex);
-        }
+        Logger.log("Getted frame with index "+frameIndex);
         /*client.getOutputStream().write(bytes, 0, length);
         client.getOutputStream().flush();*/
     }
