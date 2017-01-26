@@ -38,5 +38,11 @@ ant.properties
 #backup files
 *.bak
 
+//other gradle files
+.gradle
+.DS_Store
+/captures
+.externalNativeBuild
+
 
 
