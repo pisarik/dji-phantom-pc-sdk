@@ -46,8 +46,6 @@ void VideoGetter::writeLoop()
 
 void VideoGetter::readLoop()
 {
-    QFile file(QString("video.mp4"));
-    file.open(QFile::WriteOnly);
     QTcpSocket socket;
     socket.setSocketDescriptor(this->socket.socketDescriptor());
     qDebug() << "Socket readable: " << socket.isReadable();
@@ -57,8 +55,16 @@ void VideoGetter::readLoop()
         //qDebug() << "wait for reading";
         if (socket.waitForReadyRead()){
             //qDebug() << "Available: " << socket.bytesAvailable();
+            char intData[4];
+            socket.read(intData, 4);
+            int frameNumber = *reinterpret_cast<int*>(intData);
+
+            QFile file(QString::number(frameNumber) + ".jpg");
+            file.open(QFile::WriteOnly);
+
             QByteArray message = socket.readAll();
             file.write(message);
+            file.close();
             /*stream_decoder.addStreamBytes(message);
             cv::cuda::GpuMat frame;
             if (stream_decoder.nextFrame(frame)){
