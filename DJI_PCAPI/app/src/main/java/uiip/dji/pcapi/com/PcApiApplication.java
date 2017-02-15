@@ -7,6 +7,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.ndk.CrashlyticsNdk;
 import dji.common.handheld.DJIHandheldButtonStatus;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.codec.DJICodecManager;
@@ -20,6 +22,7 @@ import dji.sdk.base.DJIBaseProduct.DJIBaseProductListener;
 import dji.sdk.base.DJIBaseProduct.DJIComponentKey;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
+import io.fabric.sdk.android.Fabric;
 
 public class PcApiApplication extends Application{
 
@@ -67,6 +70,7 @@ public class PcApiApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk());
         mHandler = new Handler(Looper.getMainLooper());
         //This is used to start SDK services and initiate SDK.
         DJISDKManager.getInstance().initSDKManager(this, mDJISDKManagerCallback);
