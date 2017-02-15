@@ -326,7 +326,7 @@ public class DJIVideoStreamDecoder implements NativeHelper.NativeDataListener {
             logd("initVideoDecoder: yuv output");
             // The surface is null, which means that the yuv data is needed, so the color format should
             // be set to YUV420.
-            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_Format32bitARGB8888);
         } else {
             logd("initVideoDecoder: display");
             // The surface is set, so the color format should be set to format surface.

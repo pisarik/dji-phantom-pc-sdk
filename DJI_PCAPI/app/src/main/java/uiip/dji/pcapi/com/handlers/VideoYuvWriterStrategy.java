@@ -1,11 +1,13 @@
 package uiip.dji.pcapi.com.handlers;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
@@ -73,6 +75,17 @@ class VideoYuvWriterStrategy extends HandleStrategy
     public void onYuvDataReceived(byte[] yuvFrame, int width, int height) {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
         Logger.log("Getted frame with index "+frameIndex);
+
+        Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bm.copyPixelsFromBuffer(ByteBuffer.wrap(yuvFrame));
+
+        try {
+            client.getOutputStream().write(frameIndex);
+            bm.compress(Bitmap.CompressFormat.JPEG, 80, client.getOutputStream());
+            client.getOutputStream().flush();
+        } catch (IOException e) {
+            Logger.log("VideoYuvWriterStrategy: " + e.getMessage());
+        }
         /*client.getOutputStream().write(bytes, 0, length);
         client.getOutputStream().flush();*/
     }
