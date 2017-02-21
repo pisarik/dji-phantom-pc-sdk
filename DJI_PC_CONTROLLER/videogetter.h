@@ -19,6 +19,7 @@ public:
 private:
     void writeLoop();
     void readLoop();
+    int readInt(QTcpSocket &socket);
 
     QTcpSocket socket;
     bool isInterrupted;

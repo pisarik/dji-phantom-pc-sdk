@@ -48,30 +48,63 @@ void VideoGetter::readLoop()
 {
     QTcpSocket socket;
     socket.setSocketDescriptor(this->socket.socketDescriptor());
+
     qDebug() << "Socket readable: " << socket.isReadable();
     qDebug() << "Socket is open: " << socket.isOpen();
     qDebug() << "ReadLoop\n";
     while (!isInterrupted){
         //qDebug() << "wait for reading";
         if (socket.waitForReadyRead()){
-            //qDebug() << "Available: " << socket.bytesAvailable();
-            char intData[4];
-            socket.read(intData, 4);
-            int frameNumber = *reinterpret_cast<int*>(intData);
+            qDebug() << "Available: " << socket.bytesAvailable();
+            int frameNumber = readInt(socket);
+            qDebug() << "Frame number: " << frameNumber;
+
+            int frameByteSize = readInt(socket);
+            qDebug() << "Frame byte size: " << frameByteSize;
+
+            QByteArray message;
+            message.resize(frameByteSize);
+            int received = 0;
+
+            while (received != frameByteSize){
+                int remaining = frameByteSize - received;
+                if (socket.waitForReadyRead() &&
+                        socket.bytesAvailable() > 4){
+                    int readed = socket.read(message.data() + received, remaining);
+                    received += readed;
+                    qDebug() << "readed: " << readed << " received: " << received;
+                }
+            }
+
 
             QFile file(QString::number(frameNumber) + ".jpg");
             file.open(QFile::WriteOnly);
-
-            QByteArray message = socket.readAll();
             file.write(message);
             file.close();
-            /*stream_decoder.addStreamBytes(message);
-            cv::cuda::GpuMat frame;
-            if (stream_decoder.nextFrame(frame)){
-                frame.copyTo(last_frame);
-                cv::imshow("Received video", last_frame);
-            }*/
-            //qDebug() << message << "\n";
         }
     }
+}
+
+int VideoGetter::readInt(QTcpSocket &socket)
+{
+    int result = 0;
+    //QTcpSocket socket;
+    //socket.setSocketDescriptor(this->socket.socketDescriptor());
+
+    while (socket.bytesAvailable() < 4)
+        socket.waitForReadyRead(10);
+
+    unsigned char intData[4] = {0, 0, 0, 0};
+    socket.read((char*)intData, 4);
+
+    qDebug() << "Readed int\nAvailable: " << socket.bytesAvailable();
+    qDebug() << "Bytes: " << (int)intData[0] << " " << (int)intData[1] << " "
+               << (int)intData[2] << " " << (int)intData[3];
+
+    result = intData[0] << 24 |
+             intData[1] << 16 |
+             intData[2] << 8  |
+             intData[3];
+
+    return result;
 }
