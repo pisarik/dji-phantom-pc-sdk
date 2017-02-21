@@ -1,13 +1,14 @@
 package uiip.dji.pcapi.com.handlers;
 
-import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 import dji.common.camera.DJICameraSettingsDef;
 import dji.common.error.DJIError;
@@ -44,12 +45,7 @@ class VideoYuvWriterStrategy extends HandleStrategy
                                 DJIVideoStreamDecoder.getInstance().parse(bytes, length);
                             }
                             catch(Exception e){
-                                Logger.log(e.getMessage());
-                                try {
-                                    Thread.sleep(1000000L);
-                                } catch (InterruptedException e1) {
-                                    e1.printStackTrace();
-                                }
+                                Logger.log("CameraCallback: " + e.getMessage());
                             }
                         }
                     });
@@ -71,23 +67,39 @@ class VideoYuvWriterStrategy extends HandleStrategy
         return false;
     }
 
+    private void writeInt(OutputStream out, int i) throws IOException{
+        out.write((byte)( i >> 24 ));
+        out.write((byte)( (i << 8) >> 24 ));
+        out.write((byte)( (i << 16) >> 24 ));
+        out.write((byte)( (i << 24) >> 24 ));
+    }
+
     @Override
     public void onYuvDataReceived(byte[] yuvFrame, int width, int height) {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
         Logger.log("Getted frame with index "+frameIndex);
 
-        Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bm.copyPixelsFromBuffer(ByteBuffer.wrap(yuvFrame));
-
         try {
-            client.getOutputStream().write(frameIndex);
-            bm.compress(Bitmap.CompressFormat.JPEG, 80, client.getOutputStream());
+            YuvImage yuvImage = new YuvImage(yuvFrame, ImageFormat.NV21 ,width, height, null);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+            byte[] jpeg = out.toByteArray();
+
+            Logger.log("Size: " + jpeg.length);
+
+            writeInt(client.getOutputStream(), frameIndex);
+            writeInt(client.getOutputStream(), jpeg.length);
+            client.getOutputStream().write(jpeg);
             client.getOutputStream().flush();
-        } catch (IOException e) {
-            Logger.log("VideoYuvWriterStrategy: " + e.getMessage());
         }
-        /*client.getOutputStream().write(bytes, 0, length);
-        client.getOutputStream().flush();*/
+        catch (RuntimeException e){
+            Logger.log("YuvWriter: " + e.getMessage() + " w: " + width + " h: " + height
+                    + " a: " + yuvFrame.length);
+        }
+        catch (IOException e) {
+            Logger.log("YuvWriter: " + e.getMessage());
+        }
     }
 
     @Override
