@@ -64,6 +64,12 @@ abstract class HandleStrategy {
             while (client.isConnected()) {
                 in.mark(Integer.MAX_VALUE);
                 String str = in.readLine();
+                if (str != null) {
+                    Logger.log("Readed String: " + str);
+                }
+                else {
+                    Logger.log("Readed String: null");
+                }
                 if (str != null &&
                         !str.equals(TERMINATE_STRING)){
                     in.reset();
