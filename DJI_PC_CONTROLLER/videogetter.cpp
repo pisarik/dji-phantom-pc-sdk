@@ -23,10 +23,11 @@ void VideoGetter::start(QString ip, quint16 port)
         socket.write("\n");
         socket.flush();
 
-        readingThread = std::thread(&VideoGetter::readLoop, this);
+        isInterrupted = false;
+        readLoop();
     }
 
-    isInterrupted = false;
+    socket.close();
 }
 
 void VideoGetter::interrupt()
@@ -34,21 +35,16 @@ void VideoGetter::interrupt()
     socket.close();
     isInterrupted = true;
 
-    readingThread.join();
     qDebug() << "INTERRUPTED!";
 }
 
 void VideoGetter::writeLoop()
 {
-    /*while (socket.isOpen()){
-    }*/
+
 }
 
 void VideoGetter::readLoop()
 {
-    QTcpSocket socket;
-    socket.setSocketDescriptor(this->socket.socketDescriptor());
-
     qDebug() << "Socket readable: " << socket.isReadable();
     qDebug() << "Socket is open: " << socket.isOpen();
     qDebug() << "ReadLoop\n";
@@ -88,8 +84,6 @@ void VideoGetter::readLoop()
 int VideoGetter::readInt(QTcpSocket &socket)
 {
     int result = 0;
-    //QTcpSocket socket;
-    //socket.setSocketDescriptor(this->socket.socketDescriptor());
 
     while (socket.bytesAvailable() < 4)
         socket.waitForReadyRead(10);

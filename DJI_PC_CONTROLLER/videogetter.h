@@ -24,9 +24,6 @@ private:
     QTcpSocket socket;
     bool isInterrupted;
 
-    std::thread writingThread;
-    std::thread readingThread;
-
     //H264StreamDecoder stream_decoder;
     cv::Mat last_frame;
 };
