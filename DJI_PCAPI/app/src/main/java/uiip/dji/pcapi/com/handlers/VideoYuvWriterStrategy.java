@@ -67,11 +67,11 @@ class VideoYuvWriterStrategy extends HandleStrategy
         return false;
     }
 
-    private void writeInt(OutputStream out, int i) throws IOException{
-        out.write((byte)( i >> 24 ));
-        out.write((byte)( (i << 8) >> 24 ));
-        out.write((byte)( (i << 16) >> 24 ));
-        out.write((byte)( (i << 24) >> 24 ));
+    private void writeInt(OutputStream out, int i) throws IOException {
+        out.write((byte) (i >> 24));
+        out.write((byte) ((i << 8) >> 24));
+        out.write((byte) ((i << 16) >> 24));
+        out.write((byte) ((i << 24) >> 24));
     }
 
     @Override
@@ -79,26 +79,63 @@ class VideoYuvWriterStrategy extends HandleStrategy
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
         Logger.log("Getted frame with index "+frameIndex);
 
-        try {
-            YuvImage yuvImage = new YuvImage(yuvFrame, ImageFormat.NV21 ,width, height, null);
+        if (frameIndex % 5 == 0) { //need for preventing out of memory error
+            try {
+                convertYuvFormatToNv21(yuvFrame, width, height);
+                YuvImage yuvImage = new YuvImage(yuvFrame, ImageFormat.NV21, width, height, null);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
-            byte[] jpeg = out.toByteArray();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+                byte[] jpeg = out.toByteArray();
 
-            Logger.log("Size: " + jpeg.length);
+                Logger.log("Size: " + jpeg.length);
 
-            writeInt(client.getOutputStream(), frameIndex);
-            writeInt(client.getOutputStream(), jpeg.length);
-            client.getOutputStream().write(jpeg);
-            client.getOutputStream().flush();
+                writeInt(client.getOutputStream(), frameIndex);
+                writeInt(client.getOutputStream(), jpeg.length);
+                client.getOutputStream().write(jpeg);
+            } catch (RuntimeException e) {
+                Logger.log("YuvWriter: " + e.getMessage() + " w: " + width + " h: " + height
+                        + " a: " + yuvFrame.length);
+            } catch (IOException e) {
+                Logger.log("YuvWriter: " + e.getMessage());
+            }
         }
-        catch (RuntimeException e){
-            Logger.log("YuvWriter: " + e.getMessage() + " w: " + width + " h: " + height
-                    + " a: " + yuvFrame.length);
+    }
+
+    private void convertYuvFormatToNv21(byte[] yuvFrame, int width, int height) {
+        byte[] y = new byte[width * height];
+        byte[] u = new byte[width * height / 4];
+        byte[] v = new byte[width * height / 4];
+        byte[] nu = new byte[width * height / 4];
+        byte[] nv = new byte[width * height / 4];
+        System.arraycopy(yuvFrame, 0, y, 0, y.length);
+        for (int i = 0; i < u.length; i++) {
+            v[i] = yuvFrame[y.length + 2 * i];
+            u[i] = yuvFrame[y.length + 2 * i + 1];
         }
-        catch (IOException e) {
-            Logger.log("YuvWriter: " + e.getMessage());
+        int uvWidth = width / 2;
+        int uvHeight = height / 2;
+        for (int j = 0; j < uvWidth / 2; j++) {
+            for (int i = 0; i < uvHeight / 2; i++) {
+                byte uSample1 = u[i * uvWidth + j];
+                byte uSample2 = u[i * uvWidth + j + uvWidth / 2];
+                byte vSample1 = v[(i + uvHeight / 2) * uvWidth + j];
+                byte vSample2 = v[(i + uvHeight / 2) * uvWidth + j + uvWidth / 2];
+                nu[2 * (i * uvWidth + j)] = uSample1;
+                nu[2 * (i * uvWidth + j) + 1] = uSample1;
+                nu[2 * (i * uvWidth + j) + uvWidth] = uSample2;
+                nu[2 * (i * uvWidth + j) + 1 + uvWidth] = uSample2;
+                nv[2 * (i * uvWidth + j)] = vSample1;
+                nv[2 * (i * uvWidth + j) + 1] = vSample1;
+                nv[2 * (i * uvWidth + j) + uvWidth] = vSample2;
+                nv[2 * (i * uvWidth + j) + 1 + uvWidth] = vSample2;
+            }
+        }
+        //nv21test
+        System.arraycopy(y, 0, yuvFrame, 0, y.length);
+        for (int i = 0; i < u.length; i++) {
+            yuvFrame[y.length + (i * 2)] = nv[i];
+            yuvFrame[y.length + (i * 2) + 1] = nu[i];
         }
     }
 
