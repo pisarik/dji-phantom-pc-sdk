@@ -5,7 +5,6 @@
 #include <QTcpSocket>
 
 #include <opencv2/core.hpp>
-#include "h264streamdecoder.h"
 
 
 class VideoGetter
@@ -27,7 +26,6 @@ private:
     std::thread writingThread;
     std::thread readingThread;
 
-    //H264StreamDecoder stream_decoder;
     cv::Mat last_frame;
 };
 

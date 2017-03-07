@@ -7,8 +7,6 @@
 #include <opencv2/core/opengl.hpp>
 #include <opencv2/cudacodec.hpp>
 
-#include "h264streamdecoder.h"
-
 VideoGetter::VideoGetter()
 {
 }

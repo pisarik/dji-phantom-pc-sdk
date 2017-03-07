@@ -15,14 +15,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-        videogetter.cpp \
-    h264streamdecoder.cpp \
-    rawh264source.cpp
+        videogetter.cpp
 
 HEADERS  += mainwindow.h \
-         videogetter.h \
-    h264streamdecoder.h \
-    rawh264source.h
+         videogetter.h
 
 FORMS    += mainwindow.ui
 
