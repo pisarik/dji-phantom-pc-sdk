@@ -1,5 +1,7 @@
 #include "videogetter.h"
 
+#include <chrono>
+
 #include <QDebug>
 #include <QFile>
 
@@ -21,8 +23,12 @@ void VideoGetter::start(QString ip, quint16 port)
         socket.write("\n");
         socket.flush();
 
-        readingThread = std::thread(&VideoGetter::readLoop, this);
+        //readingThread = std::thread(&VideoGetter::readLoop, this);
     }
+
+    readLoop();
+
+    socket.close();
 
     isInterrupted = false;
 }
@@ -32,7 +38,9 @@ void VideoGetter::interrupt()
     socket.close();
     isInterrupted = true;
 
-    readingThread.join();
+    if (readingThread.joinable()){
+        readingThread.join();
+    }
     qDebug() << "INTERRUPTED!";
 }
 
@@ -44,18 +52,29 @@ void VideoGetter::writeLoop()
 
 void VideoGetter::readLoop()
 {
-    QTcpSocket socket;
-    socket.setSocketDescriptor(this->socket.socketDescriptor());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::milliseconds;
+    using std::chrono::duration_cast;
+    //QTcpSocket socket;
+    //socket.setSocketDescriptor(this->socket.socketDescriptor());
 
     qDebug() << "Socket readable: " << socket.isReadable();
     qDebug() << "Socket is open: " << socket.isOpen();
     qDebug() << "ReadLoop\n";
+
+    auto start_time = high_resolution_clock::now();
+
     while (!isInterrupted){
-        //qDebug() << "wait for reading";
         if (socket.waitForReadyRead()){
+
+
             qDebug() << "Available: " << socket.bytesAvailable();
             int frameNumber = readInt(socket);
             qDebug() << "Frame number: " << frameNumber;
+
+            if (frameNumber > 1000){
+                isInterrupted = true;
+            }
 
             int frameByteSize = readInt(socket);
             qDebug() << "Frame byte size: " << frameByteSize;
@@ -70,10 +89,9 @@ void VideoGetter::readLoop()
                         socket.bytesAvailable() > 4){
                     int readed = socket.read(message.data() + received, remaining);
                     received += readed;
-                    qDebug() << "readed: " << readed << " received: " << received;
+                    //qDebug() << "readed: " << readed << " received: " << received;
                 }
             }
-
 
             QFile file(QString::number(frameNumber) + ".jpg");
             file.open(QFile::WriteOnly);
@@ -81,6 +99,9 @@ void VideoGetter::readLoop()
             file.close();
         }
     }
+    auto finish_time = high_resolution_clock::now();
+    qDebug() << "Receiving time: " << duration_cast<milliseconds>(finish_time - start_time)
+                                      .count() << "ms";
 }
 
 int VideoGetter::readInt(QTcpSocket &socket)
