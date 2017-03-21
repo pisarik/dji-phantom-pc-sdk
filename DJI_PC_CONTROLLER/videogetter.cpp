@@ -6,7 +6,7 @@
 #include <QCoreApplication>
 
 VideoGetter::VideoGetter()
-    : socket_type("VIDEO_YUV_TYPE"),
+    : socket_type("VIDEO_JPG_TYPE"),
       ip("0.0.0.0"), port(1212)
 {
     socket = nullptr;

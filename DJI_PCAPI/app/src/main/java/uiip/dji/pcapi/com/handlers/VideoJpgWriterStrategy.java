@@ -25,10 +25,10 @@ import static dji.midware.data.forbid.DJIFlyForbidController.DataSwitchEvent.DJI
  * Created by dji on 16.01.2017.
  */
 
-class VideoYuvWriterStrategy extends HandleStrategy
+class VideoJpgWriterStrategy extends HandleStrategy
                              implements DJIVideoStreamDecoder.IYuvDataListener{
 
-    public VideoYuvWriterStrategy(final Socket client){
+    public VideoJpgWriterStrategy(final Socket client){
         super(client);
 
         DJICamera camera = PcApiApplication.getCameraInstance();
