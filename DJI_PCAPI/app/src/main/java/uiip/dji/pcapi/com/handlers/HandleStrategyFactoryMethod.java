@@ -28,17 +28,9 @@ class HandleStrategyFactoryMethod {
                 Logger.log("TELEMETRY_TYPE obtained");
                 //result = new TelemetryWriterAlgo();
                 break;
-            case "VIDEO_STREAM_TYPE":
-                Logger.log("VIDEO_STREAM_TYPE obtained");
-                result = new VideoStreamWriterStrategy(client);
-                break;
             case "VIDEO_YUV_TYPE":
                 Logger.log("VIDEO_YUV_TYPE obtained");
                 result = new VideoYuvWriterStrategy(client);
-                break;
-            case "VIDEO_VIA_SURFACE_TYPE":
-                Logger.log("VIDEO_VIA_SURFACE_TYPE obtained");
-                result = new VideoWriterViaSurfaceTextureStrategy(client, context);
                 break;
             default:
                 Logger.log("Unexpected type");
