@@ -3,11 +3,7 @@
 #include <chrono>
 
 #include <QDebug>
-#include <QFile>
-
-#include <opencv2/highgui.hpp>
-#include <opencv2/core/opengl.hpp>
-#include <opencv2/cudacodec.hpp>
+#include <QCoreApplication>
 
 VideoGetter::VideoGetter()
     : socket_type("VIDEO_YUV_TYPE"),
@@ -39,17 +35,23 @@ void VideoGetter::start()
         socket->write(socket_type.toLocal8Bit());
         socket->write("\n");
         socket->flush();
+
+        readLoop();
+
+        socket->close();
+    }
+    else{
+        qDebug() << "cannot connect to " << ip << ":" << port;
     }
 
-    readLoop();
-
-    socket->close();
+    emit finished();
 }
 
 void VideoGetter::interrupt()
 {
-    socket->close();
-    emit finished();
+    qDebug() << "VideoGetter: disconnecting";
+    socket->disconnectFromHost();
+    //emit finished();
 }
 
 void VideoGetter::readLoop()
@@ -64,8 +66,8 @@ void VideoGetter::readLoop()
 
     auto start_time = high_resolution_clock::now();
 
-    while (socket->isOpen()){
-        if (socket->waitForReadyRead()){
+    while (socket->state() == QTcpSocket::SocketState::ConnectedState){
+        if (socket->waitForReadyRead(3000)){
 
 
             qDebug() << "Available: " << socket->bytesAvailable();
@@ -94,6 +96,7 @@ void VideoGetter::readLoop()
             }
 
             emit gotFrame(message, frameNumber);
+            QCoreApplication::processEvents( QEventLoop::AllEvents, 5 );
         }
     }
     auto finish_time = high_resolution_clock::now();

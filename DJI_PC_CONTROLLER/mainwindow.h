@@ -34,7 +34,7 @@ private slots:
 
   void on_interrupt_video_btn_clicked();
 
-  void videoReceivingStopped() { isVideoReceiving = false; }
+  void videoReceivingStopped() {    qDebug() << "Thread finished"; isVideoReceiving = false; }
 
 private:
   Ui::MainWindow *ui;
