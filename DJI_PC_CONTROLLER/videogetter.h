@@ -5,27 +5,37 @@
 #include <QTcpSocket>
 
 #include <opencv2/core.hpp>
-#include "h264streamdecoder.h"
 
 
-class VideoGetter
+class VideoGetter : public QObject
 {
+    Q_OBJECT
+
+    const QString socket_type;
 public:
     VideoGetter();
+    ~VideoGetter();
 
-    void start(QString ip, quint16 port);
+    void setAddress(QString ip, quint16 port);
+
+public slots:
+    void start();
     void interrupt();
+
+signals:
+    void gotFrame(QByteArray raw_frame_bytes, quint32 frame_num,
+                  QString format = "JPG");
+    void finished();
 
 private:
     void writeLoop();
     void readLoop();
-    int readInt(QTcpSocket &socket);
+    int readInt(QTcpSocket *socket);
 
-    QTcpSocket socket;
-    bool isInterrupted;
+    QString ip;
+    quint16 port;
 
-    //H264StreamDecoder stream_decoder;
-    cv::Mat last_frame;
+    QTcpSocket *socket;
 };
 
 #endif // VIDEOGETTER_H
