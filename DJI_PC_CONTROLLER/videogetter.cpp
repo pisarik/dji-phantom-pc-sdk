@@ -52,7 +52,6 @@ void VideoGetter::interrupt()
 {
     qDebug() << "VideoGetter: disconnecting";
     socket->disconnectFromHost();
-    //emit finished();
 }
 
 void VideoGetter::readLoop()
@@ -103,26 +102,4 @@ void VideoGetter::readLoop()
     auto finish_time = high_resolution_clock::now();
     qDebug() << "Receiving time: " << duration_cast<milliseconds>(finish_time - start_time)
                                       .count() << "ms";
-}
-
-int VideoGetter::readInt(QTcpSocket *socket)
-{
-    int result = 0;
-
-    while (socket->bytesAvailable() < 4)
-        socket->waitForReadyRead();
-
-    unsigned char intData[4] = {0, 0, 0, 0};
-    socket->read((char*)intData, 4);
-
-    qDebug() << "Readed int\nAvailable: " << socket->bytesAvailable();
-    qDebug() << "Bytes: " << (int)intData[0] << " " << (int)intData[1] << " "
-               << (int)intData[2] << " " << (int)intData[3];
-
-    result = intData[0] << 24 |
-             intData[1] << 16 |
-             intData[2] << 8  |
-             intData[3];
-
-    return result;
 }

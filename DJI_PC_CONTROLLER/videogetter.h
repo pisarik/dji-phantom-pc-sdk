@@ -30,7 +30,6 @@ signals:
 private:
     void writeLoop();
     void readLoop();
-    int readInt(QTcpSocket *socket);
 
     QString ip;
     quint16 port;
