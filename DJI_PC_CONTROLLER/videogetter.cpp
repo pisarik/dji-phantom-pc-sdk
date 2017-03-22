@@ -66,40 +66,51 @@ void VideoGetter::readLoop()
 
     auto start_time = high_resolution_clock::now();
 
-    while (socket->state() == QTcpSocket::SocketState::ConnectedState){
+    while (isSocketGood()){
         if (socket->waitForReadyRead(3000)){
-            QDataStream stream(socket);
             qDebug() << "Available: " << socket->bytesAvailable();
 
-            while (socket->bytesAvailable() < 8)
-                socket->waitForReadyRead();
             uint frameNumber = 0;
             uint frameByteSize = 0;
+
+            while (isSocketGood()
+                   && socket->bytesAvailable() < 8){
+                QCoreApplication::processEvents( QEventLoop::AllEvents, 1 );
+            }
+            if (!isSocketGood()){
+                break;
+            }
+            QDataStream stream(socket);
             stream >> frameNumber >> frameByteSize;
+
             qDebug() << "Frame number: " << frameNumber;
             qDebug() << "Frame byte size: " << frameByteSize;
 
             QByteArray message;
             message.resize(frameByteSize);
             uint received = 0;
-
-            while (received != frameByteSize){
+            while (isSocketGood()
+                   && received != frameByteSize){
                 uint remaining = frameByteSize - received;
-                if (socket->waitForReadyRead()){
+                if (socket->waitForReadyRead(3000)){
                     uint readed = socket->read(message.data() + received,
-                                                       remaining);
+                                               remaining);
                     received += readed;
                 }
+                QCoreApplication::processEvents( QEventLoop::AllEvents, 1 );
             }
 
-            emit gotFrame(message, frameNumber);
+            if (isSocketGood()){
+                emit gotFrame(message, frameNumber);
+            }
         }
         else{
             qDebug() << "Not ready socket for read";
         }
-        QCoreApplication::processEvents( QEventLoop::AllEvents, 5 );
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 1 );
     }
     auto finish_time = high_resolution_clock::now();
-    qDebug() << "Receiving time: " << duration_cast<milliseconds>(finish_time - start_time)
-                                      .count() << "ms";
+    qDebug() << "Receiving video time: "
+             << duration_cast<milliseconds>(finish_time - start_time).count()
+             << "ms";
 }
