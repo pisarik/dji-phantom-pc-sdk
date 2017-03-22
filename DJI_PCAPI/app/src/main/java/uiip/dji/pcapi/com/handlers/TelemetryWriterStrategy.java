@@ -53,8 +53,8 @@ class TelemetryWriterStrategy extends HandleStrategy {
             dos.writeDouble(curState.getVelocityY());
             dos.writeDouble(curState.getVelocityZ());
 
-            dos.writeDouble(curState.getAttitude().roll);
             dos.writeDouble(curState.getAttitude().pitch);
+            dos.writeDouble(curState.getAttitude().roll);
             dos.writeDouble(curState.getAttitude().yaw);
         } catch (IOException e) {
             Logger.log("Telemetry: " + e.getMessage());
