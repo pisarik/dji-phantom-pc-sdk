@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QCoreApplication>
+#include <QDataStream>
 
 VideoGetter::VideoGetter()
     : socket_type("VIDEO_JPG_TYPE"),
@@ -68,17 +69,15 @@ void VideoGetter::readLoop()
 
     while (socket->state() == QTcpSocket::SocketState::ConnectedState){
         if (socket->waitForReadyRead(3000)){
-
-
+            QDataStream stream(socket);
             qDebug() << "Available: " << socket->bytesAvailable();
-            int frameNumber = readInt(socket);
+
+            while (socket->bytesAvailable() < 8)
+                socket->waitForReadyRead();
+            uint frameNumber = 0;
+            uint frameByteSize = 0;
+            stream >> frameNumber >> frameByteSize;
             qDebug() << "Frame number: " << frameNumber;
-
-            /*if (frameNumber > 1000){
-                socket->close();
-            }*/
-
-            uint frameByteSize = readInt(socket);
             qDebug() << "Frame byte size: " << frameByteSize;
 
             QByteArray message;
@@ -91,13 +90,15 @@ void VideoGetter::readLoop()
                     uint readed = socket->read(message.data() + received,
                                                        remaining);
                     received += readed;
-                    //qDebug() << "readed: " << readed << " received: " << received;
                 }
             }
 
             emit gotFrame(message, frameNumber);
-            QCoreApplication::processEvents( QEventLoop::AllEvents, 5 );
         }
+        else{
+            qDebug() << "Not ready socket for read";
+        }
+        QCoreApplication::processEvents( QEventLoop::AllEvents, 5 );
     }
     auto finish_time = high_resolution_clock::now();
     qDebug() << "Receiving time: " << duration_cast<milliseconds>(finish_time - start_time)

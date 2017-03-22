@@ -6,6 +6,7 @@ import android.graphics.YuvImage;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -67,19 +68,11 @@ class VideoJpgWriterStrategy extends HandleStrategy
         return false;
     }
 
-    private void writeInt(OutputStream out, int i) throws IOException {
-        out.write((byte) (i >> 24));
-        out.write((byte) ((i << 8) >> 24));
-        out.write((byte) ((i << 16) >> 24));
-        out.write((byte) ((i << 24) >> 24));
-    }
-
     @Override
     public void onYuvDataReceived(byte[] yuvFrame, int width, int height) {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
-        Logger.log("Getted frame with index "+frameIndex);
 
-        if (frameIndex % 5 == 0) { //need for preventing out of memory error
+        if (frameIndex % 15 == 0) { //need for preventing out of memory error
             try {
                 convertYuvFormatToNv21(yuvFrame, width, height);
                 YuvImage yuvImage = new YuvImage(yuvFrame, ImageFormat.NV21, width, height, null);
@@ -88,10 +81,14 @@ class VideoJpgWriterStrategy extends HandleStrategy
                 yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
                 byte[] jpeg = out.toByteArray();
 
+                Logger.log("Send frame with index "+frameIndex);
                 Logger.log("Size: " + jpeg.length);
 
-                writeInt(client.getOutputStream(), frameIndex);
-                writeInt(client.getOutputStream(), jpeg.length);
+                DataOutputStream dos = new DataOutputStream(client.getOutputStream());
+                dos.writeInt(frameIndex);
+                dos.writeInt(jpeg.length);
+//                writeInt(client.getOutputStream(), frameIndex);
+//                writeInt(client.getOutputStream(), jpeg.length);
                 client.getOutputStream().write(jpeg);
             } catch (RuntimeException e) {
                 Logger.log("YuvWriter: " + e.getMessage() + " w: " + width + " h: " + height
