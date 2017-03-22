@@ -64,8 +64,9 @@ void TelemetryGetter::readLoop()
     while (isSocketGood()){
         if (socket->waitForReadyRead(3000)){
             while (isSocketGood()
-                   && socket->bytesAvailable() < sizeof(Telemetry))
+                   && socket->bytesAvailable() < sizeof(Telemetry)){
                 QCoreApplication::processEvents( QEventLoop::AllEvents, 1 );
+            }
 
             if (isSocketGood()){
                 Telemetry telemetry;

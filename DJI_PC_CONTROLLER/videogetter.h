@@ -1,11 +1,8 @@
 #ifndef VIDEOGETTER_H
 #define VIDEOGETTER_H
 
-#include <thread>
+#include <QObject>
 #include <QTcpSocket>
-
-#include <opencv2/core.hpp>
-
 
 class VideoGetter : public QObject
 {

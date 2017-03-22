@@ -28,7 +28,7 @@ public slots:
     void interrupt();
 
 signals:
-    void gotTelemetry(Telemetry telemetry);
+    void gotTelemetry(Telemetry t);
     void finished();
 
 private:

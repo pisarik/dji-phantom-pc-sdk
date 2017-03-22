@@ -21,7 +21,7 @@ public:
 
 public slots:
     void showRawFrame(QByteArray frame_bytes, quint32 frame_num, QString format);
-    void showTelemetry(Telemetry telemetry);
+    void showTelemetry(Telemetry t);
 
 signals:
     void interrupt_video_receiving();

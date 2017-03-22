@@ -4,7 +4,6 @@
 #include "videogetter.h"
 #include "telemetrygetter.h"
 
-#include <QHostAddress>
 #include <QDebug>
 #include <QThread>
 
@@ -33,10 +32,8 @@ void MainWindow::showRawFrame(QByteArray frame_bytes, quint32 frame_num,
     cur_frame.setPixmap(image);
 }
 
-void MainWindow::showTelemetry(Telemetry telemetry)
+void MainWindow::showTelemetry(Telemetry t)
 {
-    const auto &t = telemetry;
-
     ui->velocity_x_edit->setText(QString::number(t.velocity_x));
     ui->velocity_y_edit->setText(QString::number(t.velocity_y));
     ui->velocity_z_edit->setText(QString::number(t.velocity_z));
