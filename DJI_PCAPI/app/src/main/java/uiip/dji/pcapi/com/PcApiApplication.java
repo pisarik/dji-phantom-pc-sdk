@@ -12,6 +12,7 @@ import com.crashlytics.android.ndk.CrashlyticsNdk;
 import dji.common.handheld.DJIHandheldButtonStatus;
 import dji.sdk.camera.DJICamera;
 import dji.sdk.codec.DJICodecManager;
+import dji.sdk.flightcontroller.DJIFlightController;
 import dji.sdk.products.DJIAircraft;
 import dji.sdk.products.DJIHandHeld;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -49,6 +50,17 @@ public class PcApiApplication extends Application{
 
     public static boolean isHandHeldConnected() {
         return getProductInstance() != null && getProductInstance() instanceof DJIHandHeld;
+    }
+
+    public static synchronized DJIFlightController getFlightControllerInstance() {
+
+        if (getProductInstance() == null) return null;
+
+        DJIFlightController flightController = null;
+
+        flightController = ((DJIAircraft) getProductInstance()).getFlightController();
+
+        return flightController;
     }
 
     public static synchronized DJICamera getCameraInstance() {

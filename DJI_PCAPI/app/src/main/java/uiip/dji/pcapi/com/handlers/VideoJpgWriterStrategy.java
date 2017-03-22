@@ -59,7 +59,7 @@ class VideoJpgWriterStrategy extends HandleStrategy
     }
 
     @Override
-    protected void writeMessage(OutputStream ostream) {
+    protected void writeMessage(OutputStream ostream) throws IOException{
 
     }
 

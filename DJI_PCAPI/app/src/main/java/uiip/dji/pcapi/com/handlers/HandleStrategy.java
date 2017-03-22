@@ -22,7 +22,7 @@ abstract class HandleStrategy {
     protected Thread asyncWriteThread = null;
 
     protected abstract void readMessage(BufferedReader reader);
-    protected abstract void writeMessage(OutputStream ostream);
+    protected abstract void writeMessage(OutputStream ostream) throws IOException;
     protected abstract boolean isNeedWrite();
     protected abstract void doJob();
     protected abstract void interrupt();
@@ -44,7 +44,6 @@ abstract class HandleStrategy {
                 public void run() {
                     try {
                         while (client.isConnected()) {
-                            System.out.println("WRITING!!!!!!");
                             writeMessage(client.getOutputStream());
                         }
                     } catch (IOException e) {

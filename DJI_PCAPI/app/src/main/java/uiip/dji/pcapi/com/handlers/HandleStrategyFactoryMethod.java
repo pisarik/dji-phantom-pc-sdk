@@ -26,7 +26,7 @@ class HandleStrategyFactoryMethod {
                 break;
             case "TELEMETRY_TYPE":
                 Logger.log("TELEMETRY_TYPE obtained");
-                //result = new TelemetryWriterAlgo();
+                result = new TelemetryWriterStrategy(client);
                 break;
             case "VIDEO_JPG_TYPE":
                 Logger.log("VIDEO_JPG_TYPE obtained");
