@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "videogetter.h"
+#include "telemetrygetter.h"
+
 #include <QHostAddress>
 #include <QDebug>
 #include <QThread>
@@ -28,6 +31,22 @@ void MainWindow::showRawFrame(QByteArray frame_bytes, quint32 frame_num,
                        format.toLocal8Bit().data());
 
     cur_frame.setPixmap(image);
+}
+
+void MainWindow::showTelemetry(Telemetry telemetry)
+{
+    const auto &t = telemetry;
+
+    ui->velocity_x_edit->setText(QString::number(t.velocity_x));
+    ui->velocity_y_edit->setText(QString::number(t.velocity_y));
+    ui->velocity_z_edit->setText(QString::number(t.velocity_z));
+
+    ui->pitch_edit->setText(QString::number(t.pitch));
+    ui->roll_edit->setText(QString::number(t.roll));
+    ui->yaw_edit->setText(QString::number(t.yaw));
+
+    ui->latitude_edit->setText(QString::number(t.latitude));
+    ui->longitude_edit->setText(QString::number(t.longitude));
 }
 
 void MainWindow::on_connect_btn_clicked()
@@ -60,7 +79,7 @@ void MainWindow::on_get_video_btn_clicked()
     QString ip_address = ui->ip_edit->text();
     quint16 port = ui->port_edit->text().toInt();
 
-    if (!isVideoReceiving){
+    if (!is_video_receiving){
         QThread *video_thread = new QThread();
 
         VideoGetter *video_getter = new VideoGetter();
@@ -88,7 +107,7 @@ void MainWindow::on_get_video_btn_clicked()
         connect(video_getter, SIGNAL(finished()), this, SLOT(videoReceivingStopped()));
 
         video_thread->start();
-        isVideoReceiving = true;
+        is_video_receiving = true;
     }
     else{
         ui->log_edit->appendPlainText("Video already receiving");
@@ -99,7 +118,65 @@ void MainWindow::on_get_video_btn_clicked()
 
 void MainWindow::on_interrupt_video_btn_clicked()
 {
-    ui->log_edit->appendPlainText("Interrupting");
+    ui->log_edit->appendPlainText("Interrupting video");
 
     emit interrupt_video_receiving();
+}
+
+void MainWindow::videoReceivingStopped() {
+    qDebug() << "VideoThread finished";
+    is_video_receiving = false;
+}
+
+void MainWindow::on_get_telemetry_btn_clicked()
+{
+    QString ip_address = ui->ip_edit->text();
+    quint16 port = ui->port_edit->text().toInt();
+
+    if (!is_telemetry_receiving){
+        QThread *telemetry_thread = new QThread();
+
+        TelemetryGetter *telemetry_getter = new TelemetryGetter();
+        telemetry_getter->setAddress(ip_address, port);
+        telemetry_getter->moveToThread(telemetry_thread);
+
+
+        // start process in telemetry getter
+        connect(telemetry_thread, SIGNAL(started()), telemetry_getter, SLOT(start()));
+
+        // get frames from telemetry_getter
+        connect(telemetry_getter, SIGNAL(gotTelemetry(Telemetry)),
+                this, SLOT(showTelemetry(Telemetry)));
+
+        // interrupt telemetry receiving
+        connect(this, SIGNAL(interrupt_telemetry_receiving()),
+                telemetry_getter, SLOT(interrupt()));
+
+        // kill thread, when finished
+        connect(telemetry_getter, SIGNAL(finished()), telemetry_thread, SLOT(quit()));
+        // delete this
+        connect(telemetry_getter, SIGNAL(finished()), telemetry_getter, SLOT(deleteLater()));
+        connect(telemetry_thread, SIGNAL(finished()), telemetry_thread, SLOT(deleteLater()));
+        // telemetry receiving stopped
+        connect(telemetry_getter, SIGNAL(finished()), this, SLOT(telemetryReceivingStopped()));
+
+        telemetry_thread->start();
+        is_telemetry_receiving = true;
+    }
+    else{
+        ui->log_edit->appendPlainText("Telemetry already receiving");
+    }
+
+}
+
+void MainWindow::on_interrupt_telemetry_btn_clicked()
+{
+    ui->log_edit->appendPlainText("Interrupting telemetry");
+
+    emit interrupt_telemetry_receiving();
+}
+
+void MainWindow::telemetryReceivingStopped() {
+    qDebug() << "Telemetry thread finished";
+    is_telemetry_receiving = false;
 }
