@@ -38,16 +38,12 @@ class TelemetryWriterStrategy extends HandleStrategy {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
 
         DJIFlightControllerCurrentState curState = flightController.getCurrentState();
-        double latitude = curState.getAircraftLocation().getLatitude();
-        double longitude = curState.getAircraftLocation().getLongitude();
-
-        double velocityX = curState.getVelocityX();
 
         try {
             DataOutputStream dos = new DataOutputStream(ostream);
             dos.writeInt(frameIndex);
-            dos.writeDouble(latitude);
-            dos.writeDouble(longitude);
+            dos.writeDouble(curState.getAircraftLocation().getLatitude());
+            dos.writeDouble(curState.getAircraftLocation().getLongitude());
 
             dos.writeDouble(curState.getVelocityX());
             dos.writeDouble(curState.getVelocityY());
