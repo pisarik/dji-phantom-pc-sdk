@@ -30,7 +30,7 @@ class ControlReaderStrategy extends HandleStrategy{
     }
 
     @Override
-    protected void doJob() {
+    protected void initialize() {
 
     }
 

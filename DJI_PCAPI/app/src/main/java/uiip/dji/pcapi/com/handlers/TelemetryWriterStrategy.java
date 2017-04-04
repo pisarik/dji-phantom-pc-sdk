@@ -73,7 +73,7 @@ class TelemetryWriterStrategy extends HandleStrategy {
     }
 
     @Override
-    protected void doJob() {
+    protected void initialize() {
 
     }
 

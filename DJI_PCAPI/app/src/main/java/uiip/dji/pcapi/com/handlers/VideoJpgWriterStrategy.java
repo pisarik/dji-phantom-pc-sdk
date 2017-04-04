@@ -134,7 +134,7 @@ class VideoJpgWriterStrategy extends HandleStrategy
     }
 
     @Override
-    protected void doJob() {
+    protected void initialize() {
         DJIVideoStreamDecoder.getInstance().setYuvDataListener(this);
         startRecord();
     }

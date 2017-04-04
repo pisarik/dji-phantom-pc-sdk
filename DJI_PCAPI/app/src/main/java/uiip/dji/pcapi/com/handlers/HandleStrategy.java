@@ -1,17 +1,12 @@
 package uiip.dji.pcapi.com.handlers;
 
-import android.widget.Toast;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
 import uiip.dji.pcapi.com.Logger;
-import uiip.dji.pcapi.com.MainActivity;
 
 /**
  * Created by dji on 16.11.2016.
@@ -24,7 +19,7 @@ abstract class HandleStrategy {
     protected abstract void readMessage(InputStream istream);
     protected abstract void writeMessage(OutputStream ostream) throws IOException;
     protected abstract boolean isNeedWrite();
-    protected abstract void doJob();
+    protected abstract void initialize();
     protected abstract void interrupt();
 
     HandleStrategy(Socket client){
@@ -37,7 +32,7 @@ abstract class HandleStrategy {
     }
 
     public void start(){
-        doJob();
+        initialize();
         if (isNeedWrite()){
             asyncWriteThread = new Thread(new Runnable() {
                 @Override
@@ -47,7 +42,13 @@ abstract class HandleStrategy {
                             writeMessage(client.getOutputStream());
                         }
                     } catch (IOException e) {
-                        //no connection
+                        if (!client.isClosed()) {
+                            try {
+                                client.close();
+                            } catch (IOException e1) {
+                                Logger.log("WriteThread: " + e.getMessage());
+                            }
+                        }
                     }
                 }
             });
@@ -61,12 +62,11 @@ abstract class HandleStrategy {
             }
         } catch (IOException e) {
             //no connection
-        } finally {
-            Logger.log("Closing connection");
-            if (isNeedWrite()){
-                asyncWriteThread.interrupt();
-            }
-            interrupt();
         }
+
+        if (isNeedWrite()){
+            asyncWriteThread.interrupt();
+        }
+        interrupt();
     }
 }
