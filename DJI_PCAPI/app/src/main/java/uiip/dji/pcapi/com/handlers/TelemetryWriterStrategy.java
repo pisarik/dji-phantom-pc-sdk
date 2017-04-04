@@ -1,13 +1,12 @@
 package uiip.dji.pcapi.com.handlers;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
 import dji.common.flightcontroller.DJIFlightControllerCurrentState;
-import dji.sdk.base.DJIBaseProduct;
 import dji.sdk.flightcontroller.DJIFlightController;
 import uiip.dji.pcapi.com.Logger;
 import uiip.dji.pcapi.com.PcApiApplication;
@@ -29,7 +28,7 @@ class TelemetryWriterStrategy extends HandleStrategy {
     }
 
     @Override
-    protected void readMessage(BufferedReader reader) {
+    protected void readMessage(InputStream istream) {
 
     }
 

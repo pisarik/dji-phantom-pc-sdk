@@ -1,7 +1,7 @@
 package uiip.dji.pcapi.com.handlers;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -15,12 +15,8 @@ class ControlReaderStrategy extends HandleStrategy{
     }
 
     @Override
-    protected void readMessage(BufferedReader reader) {
-        try {
-            System.out.println("I got message: " + reader.readLine());
-        } catch (IOException e) {
-            throw new IllegalArgumentException("ControlReader: cannot readLine");
-        }
+    protected void readMessage(InputStream istream) {
+
     }
 
     @Override

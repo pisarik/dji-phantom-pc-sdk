@@ -4,6 +4,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -17,11 +18,10 @@ import uiip.dji.pcapi.com.MainActivity;
  */
 
 abstract class HandleStrategy {
-    private final String TERMINATE_STRING = "CLOSE_CONNECTION";
     protected Socket client = null;
     protected Thread asyncWriteThread = null;
 
-    protected abstract void readMessage(BufferedReader reader);
+    protected abstract void readMessage(InputStream istream);
     protected abstract void writeMessage(OutputStream ostream) throws IOException;
     protected abstract boolean isNeedWrite();
     protected abstract void doJob();
@@ -56,28 +56,8 @@ abstract class HandleStrategy {
 
 
         try {
-            BufferedReader in =
-                    new BufferedReader(
-                            new InputStreamReader(client.getInputStream()));
-
             while (client.isConnected()) {
-                in.mark(Integer.MAX_VALUE);
-                String str = in.readLine();
-                if (str != null) {
-                    Logger.log("Readed String: " + str);
-                }
-                else {
-                    Logger.log("Readed String: null");
-                }
-                if (str != null &&
-                        !str.equals(TERMINATE_STRING)){
-                    in.reset();
-                    readMessage(in);
-                }
-                else{
-                    client.close();
-                    break;
-                }
+                readMessage(client.getInputStream());
             }
         } catch (IOException e) {
             //no connection

@@ -4,10 +4,10 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -18,9 +18,6 @@ import dji.sdk.camera.DJICamera;
 import uiip.dji.pcapi.com.Logger;
 import uiip.dji.pcapi.com.PcApiApplication;
 import uiip.dji.pcapi.com.media.DJIVideoStreamDecoder;
-import uiip.dji.pcapi.com.media.NativeHelper;
-
-import static dji.midware.data.forbid.DJIFlyForbidController.DataSwitchEvent.DJI;
 
 /**
  * Created by dji on 16.01.2017.
@@ -54,7 +51,7 @@ class VideoJpgWriterStrategy extends HandleStrategy
     }
 
     @Override
-    protected void readMessage(BufferedReader reader) {
+    protected void readMessage(InputStream istream) {
         throw new UnsupportedOperationException("Unexpected input");
     }
 
