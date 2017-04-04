@@ -38,9 +38,16 @@ public class ClientHandler extends Thread{
                 PrintWriter writer = new PrintWriter(client.getOutputStream());
                 writer.write("Not supported socket_type");
                 writer.flush();
-                client.close();
             } catch (IOException e) {
                 //no connection
+            }
+        }
+
+        if (!client.isClosed()) {
+            try {
+                client.close();
+            } catch (IOException e) {
+                Logger.log("Client Handler: " + e.getMessage());
             }
         }
     }
