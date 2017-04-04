@@ -16,7 +16,7 @@ abstract class HandleStrategy {
     protected Socket client = null;
     protected Thread asyncWriteThread = null;
 
-    protected abstract void readMessage(InputStream istream);
+    protected abstract void readMessage(InputStream istream) throws IOException;
     protected abstract void writeMessage(OutputStream ostream) throws IOException;
     protected abstract boolean isNeedWrite();
     protected abstract void initialize();

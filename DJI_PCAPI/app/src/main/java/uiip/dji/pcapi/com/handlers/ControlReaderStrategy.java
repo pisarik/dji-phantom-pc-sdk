@@ -15,7 +15,7 @@ class ControlReaderStrategy extends HandleStrategy{
     }
 
     @Override
-    protected void readMessage(InputStream istream) {
+    protected void readMessage(InputStream istream) throws IOException {
 
     }
 
