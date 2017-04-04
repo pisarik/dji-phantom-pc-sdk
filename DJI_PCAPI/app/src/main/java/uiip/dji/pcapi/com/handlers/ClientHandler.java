@@ -34,10 +34,10 @@ public class ClientHandler extends Thread{
             handler.start();
         }
         else{
+            Logger.log("Not supported socket type");
             try{
-                PrintWriter writer = new PrintWriter(client.getOutputStream());
-                writer.write("Not supported socket_type");
-                writer.flush();
+                sendMessageToClient("Not supported socket_type");
+                client.close();
             } catch (IOException e) {
                 //no connection
             }
@@ -66,15 +66,19 @@ public class ClientHandler extends Thread{
             handler = factory.getAlgo(socket_type, client, context);
         }
         catch (IOException e) {
+            Logger.log("Time for specify type expired");
             try{
-                Logger.log("Time for specify type expired");
-                PrintWriter writer = new PrintWriter(client.getOutputStream());
-                writer.write("Choosing time expired");
-                writer.flush();
+                sendMessageToClient("Choosing time expired");
                 client.close();
             } catch (IOException er) {
                 //no connection
             }
         }
+    }
+
+    private void sendMessageToClient(String msg) throws IOException {
+        PrintWriter writer = new PrintWriter(client.getOutputStream());
+        writer.write(msg);
+        writer.flush();
     }
 }
