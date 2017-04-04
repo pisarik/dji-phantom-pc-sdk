@@ -58,6 +58,13 @@ class TelemetryWriterStrategy extends HandleStrategy {
             throw e;
         }
 
+        ostream.flush();
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
