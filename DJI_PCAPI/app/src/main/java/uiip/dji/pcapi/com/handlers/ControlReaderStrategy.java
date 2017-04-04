@@ -5,13 +5,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import dji.common.error.DJIError;
+import dji.common.flightcontroller.DJIVirtualStickFlightControlData;
+import dji.common.flightcontroller.DJIVirtualStickRollPitchControlMode;
+import dji.common.flightcontroller.DJIVirtualStickVerticalControlMode;
+import dji.common.flightcontroller.DJIVirtualStickYawControlMode;
+import dji.common.util.DJICommonCallbacks;
+import dji.sdk.flightcontroller.DJIFlightController;
+import uiip.dji.pcapi.com.Logger;
+import uiip.dji.pcapi.com.MainActivity;
+import uiip.dji.pcapi.com.PcApiApplication;
+
 /**
  * Created by dji on 17.11.2016.
  */
 
 class ControlReaderStrategy extends HandleStrategy{
+
+    private DJIVirtualStickFlightControlData controller = new DJIVirtualStickFlightControlData(0,0,0,0);
+    DJIFlightController flightController = null;
+
     ControlReaderStrategy(Socket client) {
         super(client);
+
+        flightController = PcApiApplication.getFlightControllerInstance();
     }
 
     @Override
@@ -31,11 +48,33 @@ class ControlReaderStrategy extends HandleStrategy{
 
     @Override
     protected void initialize() {
+        flightController.enableVirtualStickControlMode(new DJICommonCallbacks.DJICompletionCallback() {
+            @Override
+            public void onResult(DJIError error) {
+                if (error == null) {
+                    Logger.log("Enabled virtual stick control mode");
+                } else {
+                    Logger.log(error.getDescription());
+                }
+            }
+        });
 
+        flightController.setRollPitchControlMode(DJIVirtualStickRollPitchControlMode.Velocity);
+        flightController.setYawControlMode(DJIVirtualStickYawControlMode.AngularVelocity);
+        flightController.setVerticalControlMode(DJIVirtualStickVerticalControlMode.Velocity);
     }
 
     @Override
     protected void interrupt() {
-
+        flightController.disableVirtualStickControlMode(new DJICommonCallbacks.DJICompletionCallback() {
+            @Override
+            public void onResult(DJIError error) {
+                if (error == null) {
+                    Logger.log("Disabled virtual stick control mode");
+                } else {
+                    Logger.log(error.getDescription());
+                }
+            }
+        });
     }
 }
