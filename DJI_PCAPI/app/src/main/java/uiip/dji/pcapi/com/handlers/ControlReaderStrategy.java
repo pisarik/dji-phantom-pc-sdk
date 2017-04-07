@@ -1,5 +1,6 @@
 package uiip.dji.pcapi.com.handlers;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +20,22 @@ import uiip.dji.pcapi.com.PcApiApplication;
 
 /**
  * Created by dji on 17.11.2016.
+ * command format:
+ * byte direction_id double velocity
+ * directions:
+ * PITCH 0
+ * ROLL 1
+ * YAW 2
+ * THROTTLE 3
  */
 
 class ControlReaderStrategy extends HandleStrategy{
+    private enum Direction{
+        PITCH,
+        ROLL,
+        YAW,
+        THROTTLE
+    }
 
     private DJIVirtualStickFlightControlData controller = new DJIVirtualStickFlightControlData(0,0,0,0);
     DJIFlightController flightController = null;
@@ -34,6 +48,41 @@ class ControlReaderStrategy extends HandleStrategy{
 
     @Override
     protected void readMessage(InputStream istream) throws IOException {
+        DataInputStream dis = new DataInputStream(istream);
+
+        byte dir_idx = dis.readByte();
+        if (dir_idx >= 0 && dir_idx < Direction.values().length){
+            Direction dir = Direction.values()[dir_idx];
+            double velocity = dis.readDouble();
+
+            DJIVirtualStickFlightControlData controlData = new DJIVirtualStickFlightControlData(0,0,0,0);
+            switch (dir){
+                case PITCH:
+                    controlData.setPitch((float)velocity);
+                    break;
+                case ROLL:
+                    controlData.setRoll((float)velocity);
+                    break;
+                case YAW:
+                    controlData.setYaw((float)velocity);
+                    break;
+                case THROTTLE:
+                    controlData.setVerticalThrottle((float)velocity);
+                    break;
+            }
+
+            flightController.sendVirtualStickFlightControlData(controlData, new DJICommonCallbacks.DJICompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    if (error == null){
+                        Logger.log("Successful sending control");
+                    }
+                    else{
+                        Logger.log("Control data not sended: " + error.getDescription());
+                    }
+                }
+            });
+        }
 
     }
 
