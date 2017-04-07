@@ -10,13 +10,6 @@ struct Telemetry;
 class TelemetryGetter : public QObject
 {
     Q_OBJECT
-
-    const QString socket_type;
-
-    QString ip;
-    quint16 port;
-
-    QTcpSocket *socket;
 public:
     TelemetryGetter();
     ~TelemetryGetter();
@@ -39,6 +32,14 @@ private:
         return socket != nullptr
                && socket->state() == QTcpSocket::SocketState::ConnectedState;
     }
+
+private:
+    const QString socket_type;
+
+    QString ip;
+    quint16 port;
+
+    QTcpSocket *socket;
 };
 
 struct Telemetry{

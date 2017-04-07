@@ -7,13 +7,6 @@
 class VideoGetter : public QObject
 {
     Q_OBJECT
-
-    const QString socket_type;
-
-    QString ip;
-    quint16 port;
-
-    QTcpSocket *socket;
 public:
     VideoGetter();
     ~VideoGetter();
@@ -37,6 +30,14 @@ private:
         return socket != nullptr
                && socket->state() == QTcpSocket::SocketState::ConnectedState;
     }
+
+private:
+    const QString socket_type;
+
+    QString ip;
+    quint16 port;
+
+    QTcpSocket *socket;
 };
 
 #endif // VIDEOGETTER_H
