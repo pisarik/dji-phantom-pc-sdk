@@ -51,22 +51,28 @@ class ControlReaderStrategy extends HandleStrategy{
         DataInputStream dis = new DataInputStream(istream);
 
         byte dir_idx = dis.readByte();
+        double velocity = dis.readDouble();
+        Logger.log("Dir: " + dir_idx + " velocity: " + velocity);
         if (dir_idx >= 0 && dir_idx < Direction.values().length){
             Direction dir = Direction.values()[dir_idx];
-            double velocity = dis.readDouble();
 
             DJIVirtualStickFlightControlData controlData = new DJIVirtualStickFlightControlData(0,0,0,0);
             switch (dir){
                 case PITCH:
+                    Logger.log("Control: got PITCH " + velocity);
+                    Logger.log("Control: got PITCH float" + (float)velocity);
                     controlData.setPitch((float)velocity);
                     break;
                 case ROLL:
+                    Logger.log("Control: got ROLL " + velocity);
                     controlData.setRoll((float)velocity);
                     break;
                 case YAW:
+                    Logger.log("Control: got YAW " + velocity);
                     controlData.setYaw((float)velocity);
                     break;
                 case THROTTLE:
+                    Logger.log("Control: got THROTTLE " + velocity);
                     controlData.setVerticalThrottle((float)velocity);
                     break;
             }
