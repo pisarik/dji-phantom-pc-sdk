@@ -16,11 +16,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
         videogetter.cpp \
-    telemetrygetter.cpp
+    telemetrygetter.cpp \
+    controlsender.cpp
 
 HEADERS  += mainwindow.h \
          videogetter.h \
-    telemetrygetter.h
+    telemetrygetter.h \
+    controlsender.h
 
 FORMS    += mainwindow.ui
 

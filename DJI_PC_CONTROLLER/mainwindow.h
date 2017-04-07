@@ -26,6 +26,7 @@ public slots:
 signals:
     void interrupt_video_receiving();
     void interrupt_telemetry_receiving();
+    void interrupt_control_sending();
 
 private slots:
   void on_connect_btn_clicked();
@@ -38,6 +39,8 @@ private slots:
   void on_telemetry_box_toggled(bool telemetry_enabled);
   void telemetryReceivingStopped();
 
+  void on_controls_box_toggled(bool control_enabled);
+  void controlSendingStopped();
 
   void updateVelocitiesEdit();
 
@@ -47,8 +50,9 @@ private slots:
   void on_throttle_slider_sliderReleased();
 
 private:
-  void start_telemetry();
   void start_video();
+  void start_telemetry();
+  void start_control();
 
 
 private:
@@ -59,6 +63,7 @@ private:
 
   bool is_video_receiving = false;
   bool is_telemetry_receiving = false;
+  bool is_control_sending = false;
 };
 
 #endif // MAINWINDOW_H

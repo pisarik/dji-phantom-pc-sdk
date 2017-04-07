@@ -3,10 +3,12 @@
 
 #include "videogetter.h"
 #include "telemetrygetter.h"
+#include "controlsender.h"
 
 #include <QDebug>
 #include <QThread>
-#include <QLayout>
+#include <QSlider>
+#include <QDial>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -115,6 +117,24 @@ void MainWindow::telemetryReceivingStopped() {
     ui->telemetry_box->setChecked(false);
 }
 
+void MainWindow::on_controls_box_toggled(bool control_enabled)
+{
+    if (control_enabled){
+        start_control();
+    }
+    else{
+        ui->log_edit->appendPlainText("Interrupting control");
+        emit interrupt_control_sending();
+    }
+}
+
+void MainWindow::controlSendingStopped()
+{
+    qDebug() << "Control object deleted";
+    is_control_sending = false;
+    ui->controls_box->setChecked(false);
+}
+
 void MainWindow::updateVelocitiesEdit()
 {
     QString line = "pitch: %1 | roll: %2 | yaw: %3 | throttle: %4 m/s";
@@ -144,7 +164,8 @@ void MainWindow::start_video()
 
 
         // start process in video getter
-        connect(video_thread, SIGNAL(started()), video_getter, SLOT(start()));
+        connect(video_thread, SIGNAL(started()),
+                video_getter, SLOT(start()));
 
         // get frames from video_getter
         connect(video_getter, SIGNAL(gotFrame(QByteArray,quint32,QString)),
@@ -155,12 +176,16 @@ void MainWindow::start_video()
                 video_getter, SLOT(interrupt()));
 
         // kill thread, when finished
-        connect(video_getter, SIGNAL(finished()), video_thread, SLOT(quit()));
+        connect(video_getter, SIGNAL(finished()),
+                video_thread, SLOT(quit()));
         // delete this
-        connect(video_getter, SIGNAL(finished()), video_getter, SLOT(deleteLater()));
-        connect(video_thread, SIGNAL(finished()), video_thread, SLOT(deleteLater()));
+        connect(video_getter, SIGNAL(finished()),
+                video_getter, SLOT(deleteLater()));
+        connect(video_thread, SIGNAL(finished()),
+                video_thread, SLOT(deleteLater()));
         // video receiving stopped
-        connect(video_getter, SIGNAL(finished()), this, SLOT(videoReceivingStopped()));
+        connect(video_getter, SIGNAL(finished()),
+                this, SLOT(videoReceivingStopped()));
 
         video_thread->start();
         is_video_receiving = true;
@@ -184,7 +209,8 @@ void MainWindow::start_telemetry()
 
 
         // start process in telemetry getter
-        connect(telemetry_thread, SIGNAL(started()), telemetry_getter, SLOT(start()));
+        connect(telemetry_thread, SIGNAL(started()),
+                telemetry_getter, SLOT(start()));
 
         // get frames from telemetry_getter
         connect(telemetry_getter, SIGNAL(gotTelemetry(Telemetry)),
@@ -195,18 +221,69 @@ void MainWindow::start_telemetry()
                 telemetry_getter, SLOT(interrupt()));
 
         // kill thread, when finished
-        connect(telemetry_getter, SIGNAL(finished()), telemetry_thread, SLOT(quit()));
+        connect(telemetry_getter, SIGNAL(finished()),
+                telemetry_thread, SLOT(quit()));
         // delete this
-        connect(telemetry_getter, SIGNAL(finished()), telemetry_getter, SLOT(deleteLater()));
-        connect(telemetry_thread, SIGNAL(finished()), telemetry_thread, SLOT(deleteLater()));
+        connect(telemetry_getter, SIGNAL(finished()),
+                telemetry_getter, SLOT(deleteLater()));
+        connect(telemetry_thread, SIGNAL(finished()),
+                telemetry_thread, SLOT(deleteLater()));
         // telemetry receiving stopped
-        connect(telemetry_getter, SIGNAL(finished()), this, SLOT(telemetryReceivingStopped()));
+        connect(telemetry_getter, SIGNAL(finished()),
+                this, SLOT(telemetryReceivingStopped()));
 
         telemetry_thread->start();
         is_telemetry_receiving = true;
     }
     else{
         ui->log_edit->appendPlainText("Telemetry already receiving");
+    }
+}
+
+void MainWindow::start_control()
+{
+    QString ip_address = ui->ip_edit->text();
+    quint16 port = ui->port_edit->text().toInt();
+
+    if (!is_control_sending){
+        ControlSender *control_sender = new ControlSender();
+        control_sender->setAddress(ip_address, port);
+
+        // send commands
+        using Direction = ControlSender::Direction;
+        connect(ui->pitch_slider, &QSlider::valueChanged,
+                [control_sender](int value){
+                    control_sender->sendCommand(Direction::PITCH, value);
+                });
+        connect(ui->roll_slider, &QDial::valueChanged,
+                [control_sender](int value){
+                    control_sender->sendCommand(Direction::ROLL, value);
+                });
+        connect(ui->yaw_dial, &QSlider::valueChanged,
+                [control_sender](int value){
+                    control_sender->sendCommand(Direction::YAW, value);
+                });
+        connect(ui->throttle_slider, &QSlider::valueChanged,
+                [control_sender](int value){
+                    control_sender->sendCommand(Direction::THROTTLE, value);
+                });
+
+        // interrupt telemetry receiving
+        connect(this, SIGNAL(interrupt_control_sending()),
+                control_sender, SLOT(interrupt()));
+
+        // delete this
+        connect(control_sender, SIGNAL(finished()),
+                control_sender, SLOT(deleteLater()));
+        // controls sending stopped
+        connect(control_sender, SIGNAL(finished()),
+                this, SLOT(controlSendingStopped()));
+
+        control_sender->start();
+        is_control_sending = true;
+    }
+    else{
+        ui->log_edit->appendPlainText("Control already sending");
     }
 }
 
