@@ -75,7 +75,42 @@ void MainWindow::log_connected()
   ui->log_edit->appendPlainText("Connected!");
 }
 
-void MainWindow::on_get_video_btn_clicked()
+void MainWindow::on_video_box_toggled(bool video_enabled)
+{
+    if (video_enabled){
+        start_video();
+    }
+    else{
+        ui->log_edit->appendPlainText("Interrupting video");
+        emit interrupt_video_receiving();
+    }
+}
+
+void MainWindow::videoReceivingStopped() {
+    qDebug() << "VideoThread finished";
+    is_video_receiving = false;
+    ui->telemetry_box->toggled(false);
+}
+
+void MainWindow::on_telemetry_box_toggled(bool telemetry_enabled)
+{
+    if (telemetry_enabled){
+        start_telemetry();
+    }
+    else{
+        ui->log_edit->appendPlainText("Interrupting telemetry");
+        emit interrupt_telemetry_receiving();
+    }
+}
+
+void MainWindow::telemetryReceivingStopped() {
+    qDebug() << "Telemetry thread finished";
+    is_telemetry_receiving = false;
+    //ui->telemetry_box->toggled(false);
+    ui->telemetry_box->setChecked(false);
+}
+
+void MainWindow::start_video()
 {
     QString ip_address = ui->ip_edit->text();
     quint16 port = ui->port_edit->text().toInt();
@@ -113,23 +148,9 @@ void MainWindow::on_get_video_btn_clicked()
     else{
         ui->log_edit->appendPlainText("Video already receiving");
     }
-
-
 }
 
-void MainWindow::on_interrupt_video_btn_clicked()
-{
-    ui->log_edit->appendPlainText("Interrupting video");
-
-    emit interrupt_video_receiving();
-}
-
-void MainWindow::videoReceivingStopped() {
-    qDebug() << "VideoThread finished";
-    is_video_receiving = false;
-}
-
-void MainWindow::on_get_telemetry_btn_clicked()
+void MainWindow::start_telemetry()
 {
     QString ip_address = ui->ip_edit->text();
     quint16 port = ui->port_edit->text().toInt();
@@ -167,17 +188,4 @@ void MainWindow::on_get_telemetry_btn_clicked()
     else{
         ui->log_edit->appendPlainText("Telemetry already receiving");
     }
-
-}
-
-void MainWindow::on_interrupt_telemetry_btn_clicked()
-{
-    ui->log_edit->appendPlainText("Interrupting telemetry");
-
-    emit interrupt_telemetry_receiving();
-}
-
-void MainWindow::telemetryReceivingStopped() {
-    qDebug() << "Telemetry thread finished";
-    is_telemetry_receiving = false;
 }

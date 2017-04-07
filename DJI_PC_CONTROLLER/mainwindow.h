@@ -32,13 +32,16 @@ private slots:
 
   void log_connected();
 
-  void on_get_video_btn_clicked();
-  void on_interrupt_video_btn_clicked();
+  void on_video_box_toggled(bool video_enabled);
   void videoReceivingStopped();
 
-  void on_get_telemetry_btn_clicked();
-  void on_interrupt_telemetry_btn_clicked();
+  void on_telemetry_box_toggled(bool telemetry_enabled);
   void telemetryReceivingStopped();
+
+private:
+  void start_telemetry();
+  void start_video();
+
 
 private:
   Ui::MainWindow *ui;
