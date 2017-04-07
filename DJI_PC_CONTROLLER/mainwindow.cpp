@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <QThread>
+#include <QLayout>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -15,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
   ui->video_view->setScene(&scene);
   scene.addItem(&cur_frame);
+
+  ui->right_vlayout->layout()->setAlignment(Qt::AlignRight);
+  ui->center_vlayout->layout()->setAlignment(Qt::AlignHCenter);
 }
 
 MainWindow::~MainWindow()
