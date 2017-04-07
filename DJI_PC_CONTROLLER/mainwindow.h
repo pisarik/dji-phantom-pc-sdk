@@ -38,6 +38,14 @@ private slots:
   void on_telemetry_box_toggled(bool telemetry_enabled);
   void telemetryReceivingStopped();
 
+
+  void updateVelocitiesEdit();
+
+  void on_pitch_slider_sliderReleased();
+  void on_roll_slider_sliderReleased();
+  void on_yaw_dial_sliderReleased();
+  void on_throttle_slider_sliderReleased();
+
 private:
   void start_telemetry();
   void start_video();

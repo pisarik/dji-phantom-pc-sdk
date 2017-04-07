@@ -19,6 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
   ui->right_vlayout->layout()->setAlignment(Qt::AlignRight);
   ui->center_vlayout->layout()->setAlignment(Qt::AlignHCenter);
+
+  connect(ui->pitch_slider, SIGNAL(valueChanged(int)), this, SLOT(updateVelocitiesEdit()));
+  connect(ui->roll_slider, SIGNAL(valueChanged(int)), this, SLOT(updateVelocitiesEdit()));
+  connect(ui->yaw_dial, SIGNAL(valueChanged(int)), this, SLOT(updateVelocitiesEdit()));
+  connect(ui->throttle_slider, SIGNAL(valueChanged(int)), this, SLOT(updateVelocitiesEdit()));
+
 }
 
 MainWindow::~MainWindow()
@@ -89,7 +95,7 @@ void MainWindow::on_video_box_toggled(bool video_enabled)
 void MainWindow::videoReceivingStopped() {
     qDebug() << "VideoThread finished";
     is_video_receiving = false;
-    ui->telemetry_box->toggled(false);
+    ui->video_box->setChecked(false);
 }
 
 void MainWindow::on_telemetry_box_toggled(bool telemetry_enabled)
@@ -106,8 +112,22 @@ void MainWindow::on_telemetry_box_toggled(bool telemetry_enabled)
 void MainWindow::telemetryReceivingStopped() {
     qDebug() << "Telemetry thread finished";
     is_telemetry_receiving = false;
-    //ui->telemetry_box->toggled(false);
     ui->telemetry_box->setChecked(false);
+}
+
+void MainWindow::updateVelocitiesEdit()
+{
+    QString line = "pitch: %1 | roll: %2 | yaw: %3 | throttle: %4 m/s";
+
+    int pitch = ui->pitch_slider->value();
+    int roll = ui->roll_slider->value();
+    int yaw = ui->yaw_dial->value();
+    int throttle = ui->throttle_slider->value();
+
+    ui->velocities_edit->setText(line.arg(QString::number(pitch),
+                                          QString::number(roll),
+                                          QString::number(yaw),
+                                          QString::number(throttle)));
 }
 
 void MainWindow::start_video()
@@ -188,4 +208,24 @@ void MainWindow::start_telemetry()
     else{
         ui->log_edit->appendPlainText("Telemetry already receiving");
     }
+}
+
+void MainWindow::on_pitch_slider_sliderReleased()
+{
+    ui->pitch_slider->setValue(0);
+}
+
+void MainWindow::on_roll_slider_sliderReleased()
+{
+    ui->roll_slider->setValue(0);
+}
+
+void MainWindow::on_yaw_dial_sliderReleased()
+{
+    ui->yaw_dial->setValue(0);
+}
+
+void MainWindow::on_throttle_slider_sliderReleased()
+{
+    ui->throttle_slider->setValue(0);
 }
