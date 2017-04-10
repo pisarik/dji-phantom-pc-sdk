@@ -1,5 +1,7 @@
 package uiip.dji.pcapi.com.handlers;
 
+import android.os.Handler;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import uiip.dji.pcapi.com.PcApiApplication;
 
 /**
  * Created by dji on 17.11.2016.
+ * Command should be sended between 5 - 25 Hz
  * command format:
  * byte direction_id double velocity
  * directions:
@@ -30,6 +33,8 @@ import uiip.dji.pcapi.com.PcApiApplication;
  */
 
 class ControlReaderStrategy extends HandleStrategy{
+    private final int SEND_FREQUNCY_HZ = 10;
+    private final int SEND_FREQUNCY_MS = 1000 / SEND_FREQUNCY_HZ;
     private enum Direction{
         PITCH,
         ROLL,
@@ -37,7 +42,29 @@ class ControlReaderStrategy extends HandleStrategy{
         THROTTLE
     }
 
-    private DJIVirtualStickFlightControlData controller = new DJIVirtualStickFlightControlData(0,0,0,0);
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+
+            flightController.sendVirtualStickFlightControlData(controlData, new DJICommonCallbacks.DJICompletionCallback() {
+                @Override
+                public void onResult(DJIError error) {
+                    if (error == null){
+                        Logger.log("Successful sending control");
+                    }
+                    else{
+                        Logger.log("Control data not sended: " + error.getDescription());
+                    }
+                }
+            });
+
+            timerHandler.postDelayed(this, SEND_FREQUNCY_MS);
+        }
+    };
+
+    private DJIVirtualStickFlightControlData controlData = new DJIVirtualStickFlightControlData(0,0,0,0);
     DJIFlightController flightController = null;
 
     ControlReaderStrategy(Socket client) {
@@ -56,7 +83,6 @@ class ControlReaderStrategy extends HandleStrategy{
         if (dir_idx >= 0 && dir_idx < Direction.values().length){
             Direction dir = Direction.values()[dir_idx];
 
-            DJIVirtualStickFlightControlData controlData = new DJIVirtualStickFlightControlData(0,0,0,0);
             switch (dir){
                 case PITCH:
                     Logger.log("Control: got PITCH " + velocity);
@@ -76,18 +102,6 @@ class ControlReaderStrategy extends HandleStrategy{
                     controlData.setVerticalThrottle((float)velocity);
                     break;
             }
-
-            flightController.sendVirtualStickFlightControlData(controlData, new DJICommonCallbacks.DJICompletionCallback() {
-                @Override
-                public void onResult(DJIError error) {
-                    if (error == null){
-                        Logger.log("Successful sending control");
-                    }
-                    else{
-                        Logger.log("Control data not sended: " + error.getDescription());
-                    }
-                }
-            });
         }
 
     }
@@ -120,6 +134,8 @@ class ControlReaderStrategy extends HandleStrategy{
         flightController.setVerticalControlMode(DJIVirtualStickVerticalControlMode.Velocity);
 
         sendVelocityRanges();
+
+        timerHandler.postDelayed(timerRunnable, 0);
     }
 
     @Override
@@ -134,6 +150,8 @@ class ControlReaderStrategy extends HandleStrategy{
                 }
             }
         });
+
+        timerHandler.removeCallbacks(timerRunnable);
     }
 
     private void sendVelocityRanges(){
