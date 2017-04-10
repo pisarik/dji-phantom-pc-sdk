@@ -56,7 +56,7 @@ void ControlSender::sendCommand(Direction dir, double velocity)
 
         qDebug() << "Direction: " << (int)char(dir);
         qDebug() << "Velocity: " << velocity;
-        stream << (char)dir << velocity;
+        stream << (quint8)dir << velocity;
         socket->flush();
     }
 }
