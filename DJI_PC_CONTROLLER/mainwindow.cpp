@@ -58,6 +58,18 @@ void MainWindow::showTelemetry(Telemetry t)
     ui->longitude_edit->setText(QString::number(t.longitude));
 }
 
+void MainWindow::setMinMaxVelocities(QVector<double> velocities)
+{
+    ui->pitch_slider->setMinimum(velocities[0]);
+    ui->pitch_slider->setMaximum(velocities[1]);
+    ui->roll_slider->setMinimum(velocities[2]);
+    ui->roll_slider->setMaximum(velocities[3]);
+    ui->yaw_dial->setMinimum(velocities[4]);
+    ui->yaw_dial->setMaximum(velocities[5]);
+    ui->throttle_slider->setMinimum(velocities[6]);
+    ui->throttle_slider->setMaximum(velocities[7]);
+}
+
 void MainWindow::on_connect_btn_clicked()
 {
   QString ip_address = ui->ip_edit->text();
@@ -248,6 +260,10 @@ void MainWindow::start_control()
     if (!is_control_sending){
         ControlSender *control_sender = new ControlSender();
         control_sender->setAddress(ip_address, port);
+
+        // receive min max velocities
+        connect(control_sender, SIGNAL(minMaxVelocities(QVector<double>)),
+                this, SLOT(setMinMaxVelocities(QVector<double>)));
 
         // send commands
         using Direction = ControlSender::Direction;

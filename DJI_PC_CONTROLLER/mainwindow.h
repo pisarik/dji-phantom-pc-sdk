@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QVector>
 
 #include "telemetrygetter.h"
 
@@ -22,6 +23,8 @@ public:
 public slots:
     void showRawFrame(QByteArray frame_bytes, quint32 frame_num, QString format);
     void showTelemetry(Telemetry t);
+
+    void setMinMaxVelocities(QVector<double> velocities);
 
 signals:
     void interrupt_video_receiving();

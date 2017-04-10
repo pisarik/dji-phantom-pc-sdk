@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QVector>
 
 class ControlSender : public QObject
 {
@@ -25,11 +26,21 @@ public slots:
 signals:
     void finished();
 
+    /* Order of velocities:
+     * pitch min, max
+     * roll min, max
+     * yaw min, max
+     * throttle min, max
+     */
+    void minMaxVelocities(QVector<double> velocities);
+
 private:
     bool isSocketGood(){
         return socket != nullptr
                && socket->state() == QTcpSocket::SocketState::ConnectedState;
     }
+
+    void readMinMaxVelocities();
 
 private:
     const QString socket_type;

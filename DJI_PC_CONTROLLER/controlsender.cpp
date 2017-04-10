@@ -32,6 +32,8 @@ void ControlSender::start()
         socket->write(socket_type.toLocal8Bit());
         socket->write("\n");
         socket->flush();
+
+        readMinMaxVelocities();
     }
     else{
         qDebug() << "cannot connect to " << ip << ":" << port;
@@ -56,5 +58,28 @@ void ControlSender::sendCommand(Direction dir, double velocity)
         qDebug() << "Velocity: " << velocity;
         stream << (char)dir << velocity;
         socket->flush();
+    }
+}
+
+void ControlSender::readMinMaxVelocities()
+{
+    if (isSocketGood()){
+        QDataStream stream(socket);
+
+        QVector<double> velocities;
+        for (int i = 0; i < 8; i++){
+            if (socket->waitForReadyRead(3000)){
+                double value;
+                stream >> value;
+                velocities << value;
+            }
+            else{
+                break;
+            }
+        }
+
+        if (velocities.size() == 8){
+            emit minMaxVelocities(velocities);
+        }
     }
 }
