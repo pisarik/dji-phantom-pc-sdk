@@ -26,7 +26,7 @@ abstract class HandleStrategy {
     HandleStrategy(Socket client){
         this.client = client;
         try{
-            this.client.setSoTimeout(0);
+            this.client.setSoTimeout(1000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
