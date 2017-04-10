@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.DJIFlightControllerDataType;
@@ -34,35 +36,15 @@ import uiip.dji.pcapi.com.PcApiApplication;
 
 class ControlReaderStrategy extends HandleStrategy{
     private final int SEND_FREQUNCY_HZ = 10;
-    private final int SEND_FREQUNCY_MS = 1000 / SEND_FREQUNCY_HZ;
+    private final int SEND_PERIOD_MS = 1000 / SEND_FREQUNCY_HZ;
     private enum Direction{
         PITCH,
         ROLL,
         YAW,
         THROTTLE
     }
-
-    Handler timerHandler = new Handler();
-    Runnable timerRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-
-            flightController.sendVirtualStickFlightControlData(controlData, new DJICommonCallbacks.DJICompletionCallback() {
-                @Override
-                public void onResult(DJIError error) {
-                    if (error == null){
-                        Logger.log("Successful sending control");
-                    }
-                    else{
-                        Logger.log("Control data not sended: " + error.getDescription());
-                    }
-                }
-            });
-
-            timerHandler.postDelayed(this, SEND_FREQUNCY_MS);
-        }
-    };
+    Timer timer = new Timer();
+    TimerTask timerTask = null;
 
     private DJIVirtualStickFlightControlData controlData = new DJIVirtualStickFlightControlData(0,0,0,0);
     DJIFlightController flightController = null;
@@ -71,6 +53,23 @@ class ControlReaderStrategy extends HandleStrategy{
         super(client);
 
         flightController = PcApiApplication.getFlightControllerInstance();
+
+        timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+
+                flightController.sendVirtualStickFlightControlData(controlData, new DJICommonCallbacks.DJICompletionCallback() {
+                    @Override
+                    public void onResult(DJIError error) {
+                        if (error != null){
+                            Logger.log("Control data not sended: " + error.getDescription());
+                        }
+                    }
+                });
+
+            }
+        };
     }
 
     @Override
@@ -135,7 +134,7 @@ class ControlReaderStrategy extends HandleStrategy{
 
         sendVelocityRanges();
 
-        timerHandler.postDelayed(timerRunnable, 0);
+        timer.schedule(timerTask, 0, SEND_PERIOD_MS);
     }
 
     @Override
@@ -151,7 +150,7 @@ class ControlReaderStrategy extends HandleStrategy{
             }
         });
 
-        timerHandler.removeCallbacks(timerRunnable);
+        timer.cancel();
     }
 
     private void sendVelocityRanges(){
