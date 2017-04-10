@@ -91,10 +91,10 @@ class VideoJpgWriterStrategy extends HandleStrategy
 //                writeInt(client.getOutputStream(), jpeg.length);
                 client.getOutputStream().write(jpeg);
             } catch (RuntimeException e) {
-                Logger.log("YuvWriter: " + e.getMessage() + " w: " + width + " h: " + height
+                Logger.log("JpgWriter: " + e.getMessage() + " w: " + width + " h: " + height
                         + " a: " + yuvFrame.length);
             } catch (IOException e) {
-                Logger.log("YuvWriter: " + e.getMessage());
+                Logger.log("JpgWriter: " + e.getMessage());
             }
         }
     }
