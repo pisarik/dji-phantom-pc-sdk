@@ -18,6 +18,7 @@ abstract class HandleStrategy {
 
     protected abstract void readMessage(InputStream istream) throws IOException;
     protected abstract void writeMessage(OutputStream ostream) throws IOException;
+    protected abstract boolean isNeedRead();
     protected abstract boolean isNeedWrite();
     protected abstract void initialize();
     protected abstract void interrupt();
@@ -33,7 +34,7 @@ abstract class HandleStrategy {
 
     public void start(){
         initialize();
-        if (isNeedWrite()){
+        if (isNeedReadWrite()){
             asyncWriteThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -58,7 +59,18 @@ abstract class HandleStrategy {
 
         try {
             while (client.isConnected()) {
-                readMessage(client.getInputStream());
+                if (isNeedReadWrite() || isNeedRead()) {
+                    //Main thread for reading
+                    readMessage(client.getInputStream());
+                }
+                else if (isNeedWrite()) {
+                    //if only write need main thread for writing
+                    writeMessage(client.getOutputStream());
+                }
+                else { //job can be done via callbacks as video writer
+                    //just wait in block
+                    client.getInputStream().read();
+                }
             }
         } catch (IOException e) {
             //no connection
@@ -68,5 +80,9 @@ abstract class HandleStrategy {
             asyncWriteThread.interrupt();
         }
         interrupt();
+    }
+
+    boolean isNeedReadWrite(){
+        return isNeedRead() && isNeedWrite();
     }
 }

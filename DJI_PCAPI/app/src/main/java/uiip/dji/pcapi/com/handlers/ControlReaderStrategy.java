@@ -111,6 +111,9 @@ class ControlReaderStrategy extends HandleStrategy{
     }
 
     @Override
+    protected boolean isNeedRead() { return true; }
+
+    @Override
     protected boolean isNeedWrite() {
         return false;
     }

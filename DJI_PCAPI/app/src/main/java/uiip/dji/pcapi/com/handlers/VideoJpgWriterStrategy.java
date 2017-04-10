@@ -61,6 +61,9 @@ class VideoJpgWriterStrategy extends HandleStrategy
     }
 
     @Override
+    protected boolean isNeedRead() { return false; }
+
+    @Override
     protected boolean isNeedWrite() {
         return false;
     }
