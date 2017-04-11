@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,6 +52,12 @@ class ControlReaderStrategy extends HandleStrategy{
 
     ControlReaderStrategy(Socket client) {
         super(client);
+
+        try {
+            client.setSoTimeout(0);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
 
         flightController = PcApiApplication.getFlightControllerInstance();
 
@@ -179,6 +186,7 @@ class ControlReaderStrategy extends HandleStrategy{
             dos.writeDouble(throttleMaxVelocity);
 
             dos.flush();
+            client.getOutputStream().flush();
         } catch (IOException e) {
             Logger.log("ControlReader: " + e.getMessage());
         }

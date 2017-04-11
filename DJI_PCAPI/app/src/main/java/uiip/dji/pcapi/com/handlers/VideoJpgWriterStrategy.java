@@ -26,6 +26,8 @@ import uiip.dji.pcapi.com.media.DJIVideoStreamDecoder;
 class VideoJpgWriterStrategy extends HandleStrategy
                              implements DJIVideoStreamDecoder.IYuvDataListener{
 
+    static boolean isRecording = false;
+
     public VideoJpgWriterStrategy(final Socket client){
         super(client);
 
@@ -180,8 +182,13 @@ class VideoJpgWriterStrategy extends HandleStrategy
                 public void onResult(DJIError error)
                 {
                     if (error == null) {
-                        //Logger.showToast("Record video: success");
-                        Logger.log("Record video: success");
+                        if (!isRecording) {
+                            //Logger.showToast("Record video: success");
+                            Logger.log("Record video: success");
+
+                            DJIVideoStreamDecoder.getInstance().frameIndex = 0;
+                            isRecording = true;
+                        }
                     }else {
                         //Logger.showToast(error.getDescription());
                         Logger.log(error.getDescription());
@@ -202,8 +209,12 @@ class VideoJpgWriterStrategy extends HandleStrategy
                 public void onResult(DJIError error)
                 {
                     if(error == null) {
-                        //Logger.showToast("Stop recording: success");
-                        Logger.log("Stop recording: success");
+                        if (isRecording) {
+                            //Logger.showToast("Stop recording: success");
+                            Logger.log("Stop recording: success");
+
+                            isRecording = false;
+                        }
                     }else {
                         //Logger.showToast(error.getDescription());
                         Logger.log(error.getDescription());

@@ -74,6 +74,7 @@ abstract class HandleStrategy {
             }
         } catch (IOException e) {
             //no connection
+            Logger.log("Strategy: " + e.getMessage());
         }
 
         if (isNeedWrite()){
