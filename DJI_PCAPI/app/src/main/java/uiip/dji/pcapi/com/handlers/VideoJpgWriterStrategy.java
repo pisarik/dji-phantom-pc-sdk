@@ -97,6 +97,11 @@ class VideoJpgWriterStrategy extends HandleStrategy
                         + " a: " + yuvFrame.length);
             } catch (IOException e) {
                 Logger.log("JpgWriter: " + e.getMessage());
+                try {
+                    client.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }

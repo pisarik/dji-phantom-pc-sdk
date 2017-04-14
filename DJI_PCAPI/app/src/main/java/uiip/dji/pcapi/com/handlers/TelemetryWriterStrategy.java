@@ -38,7 +38,7 @@ class TelemetryWriterStrategy extends HandleStrategy {
 
         DJIFlightControllerCurrentState curState = flightController.getCurrentState();
 
-        try {
+        //try {
             DataOutputStream dos = new DataOutputStream(ostream);
             dos.writeInt(frameIndex);
             dos.writeDouble(curState.getAircraftLocation().getLatitude());
@@ -51,11 +51,11 @@ class TelemetryWriterStrategy extends HandleStrategy {
             dos.writeDouble(curState.getAttitude().pitch);
             dos.writeDouble(curState.getAttitude().roll);
             dos.writeDouble(curState.getAttitude().yaw);
-        } catch (IOException e) {
+        /*} catch (IOException e) {
             Logger.log("Telemetry: " + e.getMessage());
             e.printStackTrace();
             throw e;
-        }
+        }*/
 
         ostream.flush();
 

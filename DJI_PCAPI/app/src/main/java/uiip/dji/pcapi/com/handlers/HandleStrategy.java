@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
 
 import uiip.dji.pcapi.com.Logger;
 
@@ -26,7 +28,7 @@ abstract class HandleStrategy {
     HandleStrategy(Socket client){
         this.client = client;
         try{
-            this.client.setSoTimeout(1000);
+            this.client.setSoTimeout(0);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -77,7 +79,7 @@ abstract class HandleStrategy {
             Logger.log("Strategy: " + e.getMessage());
         }
 
-        if (isNeedWrite()){
+        if (isNeedReadWrite()){
             asyncWriteThread.interrupt();
         }
         interrupt();

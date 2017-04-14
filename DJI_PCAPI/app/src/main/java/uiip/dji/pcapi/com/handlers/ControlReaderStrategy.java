@@ -53,12 +53,6 @@ class ControlReaderStrategy extends HandleStrategy{
     ControlReaderStrategy(Socket client) {
         super(client);
 
-        try {
-            client.setSoTimeout(0);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-
         flightController = PcApiApplication.getFlightControllerInstance();
 
         timerTask = new TimerTask() {
@@ -185,7 +179,6 @@ class ControlReaderStrategy extends HandleStrategy{
             dos.writeDouble(throttleMinVelocity);
             dos.writeDouble(throttleMaxVelocity);
 
-            dos.flush();
             client.getOutputStream().flush();
         } catch (IOException e) {
             Logger.log("ControlReader: " + e.getMessage());
