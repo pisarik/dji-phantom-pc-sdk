@@ -2,6 +2,7 @@
 #define TELEMETRYGETTER_H
 
 #include <QObject>
+#include <QFile>
 #include <QTcpSocket>
 #include <QDataStream>
 
@@ -59,6 +60,17 @@ struct Telemetry{
         stream >> frame_num >> latitude >> longitude
                >> velocity_x >> velocity_y >> velocity_z
                >> pitch >> roll >> yaw;
+    }
+
+    void writeToFile(QString filename){
+        QFile file(filename);
+
+        if (file.open(QIODevice::WriteOnly | QIODevice::Append)){
+            QTextStream in(&file);
+            in << frame_num << " " << latitude << " " << longitude << " "
+               << velocity_x << " " << velocity_y << " " << velocity_z << " "
+               << pitch << " " << roll << " " << yaw << "\n";
+        }
     }
 };
 
