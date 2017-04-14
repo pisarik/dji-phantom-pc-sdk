@@ -267,19 +267,19 @@ void MainWindow::start_control()
 
         // send commands
         using Direction = ControlSender::Direction;
-        connect(ui->pitch_slider, &QSlider::valueChanged,
+        connect(ui->pitch_slider, &QSlider::valueChanged, control_sender,
                 [control_sender](int value){
                     control_sender->sendCommand(Direction::PITCH, value);
                 });
-        connect(ui->roll_slider, &QDial::valueChanged,
+        connect(ui->roll_slider, &QDial::valueChanged, control_sender,
                 [control_sender](int value){
                     control_sender->sendCommand(Direction::ROLL, value);
                 });
-        connect(ui->yaw_dial, &QSlider::valueChanged,
+        connect(ui->yaw_dial, &QSlider::valueChanged, control_sender,
                 [control_sender](int value){
                     control_sender->sendCommand(Direction::YAW, value);
                 });
-        connect(ui->throttle_slider, &QSlider::valueChanged,
+        connect(ui->throttle_slider, &QSlider::valueChanged, control_sender,
                 [control_sender](int value){
                     control_sender->sendCommand(Direction::THROTTLE, value);
                 });
