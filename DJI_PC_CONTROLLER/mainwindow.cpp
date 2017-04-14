@@ -199,8 +199,8 @@ void MainWindow::start_video()
         connect(video_getter, SIGNAL(finished()),
                 this, SLOT(videoReceivingStopped()));
 
-        video_thread->start();
         is_video_receiving = true;
+        video_thread->start();
     }
     else{
         ui->log_edit->appendPlainText("Video already receiving");
@@ -244,8 +244,8 @@ void MainWindow::start_telemetry()
         connect(telemetry_getter, SIGNAL(finished()),
                 this, SLOT(telemetryReceivingStopped()));
 
-        telemetry_thread->start();
         is_telemetry_receiving = true;
+        telemetry_thread->start();
     }
     else{
         ui->log_edit->appendPlainText("Telemetry already receiving");
@@ -295,8 +295,8 @@ void MainWindow::start_control()
         connect(control_sender, SIGNAL(finished()),
                 this, SLOT(controlSendingStopped()));
 
-        control_sender->start();
         is_control_sending = true;
+        control_sender->start();
     }
     else{
         ui->log_edit->appendPlainText("Control already sending");
