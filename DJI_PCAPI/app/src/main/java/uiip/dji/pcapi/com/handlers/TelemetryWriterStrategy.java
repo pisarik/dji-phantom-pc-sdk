@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Calendar;
 
 import dji.common.flightcontroller.DJIFlightControllerCurrentState;
 import dji.sdk.flightcontroller.DJIFlightController;
@@ -37,12 +38,15 @@ class TelemetryWriterStrategy extends HandleStrategy {
         int frameIndex = DJIVideoStreamDecoder.getInstance().frameIndex;
 
         DJIFlightControllerCurrentState curState = flightController.getCurrentState();
+        long time = System.currentTimeMillis();
 
         //try {
             DataOutputStream dos = new DataOutputStream(ostream);
             dos.writeInt(frameIndex);
+            dos.writeLong(time);
             dos.writeDouble(curState.getAircraftLocation().getLatitude());
             dos.writeDouble(curState.getAircraftLocation().getLongitude());
+            dos.writeDouble(curState.getAircraftLocation().getAltitude());
 
             dos.writeDouble(curState.getVelocityX());
             dos.writeDouble(curState.getVelocityY());

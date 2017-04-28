@@ -179,9 +179,12 @@ class ControlReaderStrategy extends HandleStrategy{
             dos.writeDouble(throttleMinVelocity);
             dos.writeDouble(throttleMaxVelocity);
 
+            Thread.sleep(50);
             client.getOutputStream().flush();
         } catch (IOException e) {
             Logger.log("ControlReader: " + e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

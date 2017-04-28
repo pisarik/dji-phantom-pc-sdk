@@ -45,8 +45,10 @@ private:
 
 struct Telemetry{
     int frame_num;
+    unsigned long long time; //in ms from epoch
     double latitude;
     double longitude;
+    double altitude;
     double velocity_x;
     double velocity_y;
     double velocity_z;
@@ -57,7 +59,8 @@ struct Telemetry{
     void readFrom(QIODevice *d){
         QDataStream stream(d);
 
-        stream >> frame_num >> latitude >> longitude
+        stream >> frame_num >> time
+               >> latitude >> longitude >> altitude
                >> velocity_x >> velocity_y >> velocity_z
                >> pitch >> roll >> yaw;
     }
@@ -67,7 +70,8 @@ struct Telemetry{
 
         if (file.open(QIODevice::WriteOnly | QIODevice::Append)){
             QTextStream in(&file);
-            in << frame_num << " " << latitude << " " << longitude << " "
+            in << frame_num << " " << time << " "
+               << latitude << " " << longitude << " " << altitude << " "
                << velocity_x << " " << velocity_y << " " << velocity_z << " "
                << pitch << " " << roll << " " << yaw << "\n";
         }
