@@ -63,6 +63,11 @@ void MainWindow::showTelemetry(Telemetry t)
     last_time = t.time;
 }
 
+void MainWindow::saveTelemetry(Telemetry t)
+{
+    t.writeToFile("telemetry.txt");
+}
+
 void MainWindow::setMinMaxVelocities(QVector<double> velocities)
 {
     ui->pitch_slider->setMinimum(velocities[0]);
@@ -232,6 +237,8 @@ void MainWindow::start_telemetry()
         // get frames from telemetry_getter
         connect(telemetry_getter, SIGNAL(gotTelemetry(Telemetry)),
                 this, SLOT(showTelemetry(Telemetry)));
+        connect(telemetry_getter, SIGNAL(gotTelemetry(Telemetry)),
+                this, SLOT(saveTelemetry(Telemetry)));
 
         // interrupt telemetry receiving
         connect(this, SIGNAL(interrupt_telemetry_receiving()),

@@ -23,6 +23,7 @@ public:
 public slots:
     void showRawFrame(QByteArray frame_bytes, quint32 frame_num, QString format);
     void showTelemetry(Telemetry t);
+    void saveTelemetry(Telemetry t);
 
     void setMinMaxVelocities(QVector<double> velocities);
 
